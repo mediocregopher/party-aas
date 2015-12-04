@@ -29,6 +29,10 @@ var index = `<html>
 				Max height of the output gif:</br>
 				<input type="text" name="maxHeight" value="128" />
 			</p>
+			<p>
+				Make the party go counterclockwise:</br>
+				<input type="checkbox" name="counterclockwise" />
+			</p>
     		<input type="submit" value="PARTYPARTYPARTY" />
 		</form>
 	</body>

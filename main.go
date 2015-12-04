@@ -45,12 +45,13 @@ func incColorN(c color.RGBA, n int) color.RGBA {
 }
 
 type ctx struct {
-	g           *gif.GIF
-	img         image.Image
-	fps         int
-	totalFrames int
-	currFrame   int
-	w, h        int
+	g                *gif.GIF
+	img              image.Image
+	fps              int
+	totalFrames      int
+	currFrame        int
+	w, h             int
+	counterclockwise bool
 }
 
 func rotatedSize(n int) int {
@@ -59,17 +60,18 @@ func rotatedSize(n int) int {
 	return int(nf2) * 2
 }
 
-func newCtx(img image.Image, totalFrames, fps int, w, h int) *ctx {
+func newCtx(img image.Image, totalFrames, fps int, w, h int, counterclockwise bool) *ctx {
 	img = imaging.Fit(img, rotatedSize(w), rotatedSize(h), imaging.Linear)
 	img = imaging.PasteCenter(image.NewRGBA(image.Rect(0, 0, w, h)), img)
 
 	return &ctx{
-		g:           &gif.GIF{LoopCount: -1},
-		img:         img,
-		fps:         fps,
-		totalFrames: totalFrames,
-		w:           w,
-		h:           h,
+		g:                &gif.GIF{LoopCount: -1},
+		img:              img,
+		fps:              fps,
+		totalFrames:      totalFrames,
+		w:                w,
+		h:                h,
+		counterclockwise: counterclockwise,
 	}
 }
 
@@ -78,6 +80,7 @@ var totalFrames = flag.Int("totalFrames", 20, "total number of frames output gif
 var fps = flag.Int("fps", 20, "frames per second the gif should run at")
 var width = flag.Int("maxWidth", 128, "max width of the gif to output")
 var height = flag.Int("maxHeight", 128, "max height of the gif to output")
+var counterclockwise = flag.Bool("counterclockwise", false, "if set the image will be spin counterclockwise")
 
 var doLog = true
 
@@ -94,7 +97,7 @@ func main() {
 		log.Fatal(http.ListenAndServe(*addr, nil))
 	}
 
-	if err := partyfy(os.Stdin, *totalFrames, *fps, *width, *height, os.Stdout); err != nil {
+	if err := partyfy(os.Stdin, *totalFrames, *fps, *width, *height, *counterclockwise, os.Stdout); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -128,17 +131,18 @@ func partyHTTP(w http.ResponseWriter, r *http.Request) {
 		reqInt(r, "fps", *fps),
 		reqInt(r, "maxWidth", *width),
 		reqInt(r, "maxHeight", *height),
+		r.FormValue("counterclockwise") != "" || *counterclockwise,
 		w,
 	)
 }
 
-func partyfy(r io.Reader, totalFrames, fps, width, height int, w io.Writer) error {
+func partyfy(r io.Reader, totalFrames, fps, width, height int, counterclockwise bool, w io.Writer) error {
 	srcImg, _, err := image.Decode(r)
 	if err != nil {
 		return err
 	}
 
-	c := newCtx(srcImg, totalFrames, fps, width, height)
+	c := newCtx(srcImg, totalFrames, fps, width, height, counterclockwise)
 	for {
 		if ok, err := c.nextFrame(); err != nil {
 			return err
@@ -151,6 +155,10 @@ func partyfy(r io.Reader, totalFrames, fps, width, height int, w io.Writer) erro
 }
 
 func (c *ctx) modify(img image.Image, col color.Color, angle float64) image.Image {
+	if c.counterclockwise {
+		angle = (2 * math.Pi) - angle
+	}
+
 	out := image.NewRGBA(img.Bounds())
 	un := image.NewUniform(col)
 	unAlph := image.NewUniform(color.RGBA{0, 0, 0, 100})
@@ -188,16 +196,8 @@ var pal = func() color.Palette {
 }()
 
 func (c *ctx) addFrame(img image.Image) error {
-	//opts := gif.Options{
-	//	NumColors: 256,
-	//	Drawer:    draw.FloydSteinberg,
-	//}
-	b := img.Bounds()
-
-	// More or less taken from the image/gif package
-	pimg := image.NewPaletted(b, pal)
-	draw.Draw(pimg, b, img, image.ZP, draw.Src)
-	//opts.Drawer.Draw(pimg, b, img, image.ZP)
+	pimg := image.NewPaletted(img.Bounds(), pal)
+	draw.Draw(pimg, pimg.Bounds(), img, image.ZP, draw.Src)
 
 	spf := 1 / float64(c.fps)
 
