@@ -53,8 +53,16 @@ type ctx struct {
 	w, h        int
 }
 
+func rotatedSize(n int) int {
+	nf := float64(n) / 2
+	nf2 := nf * math.Cos(math.Pi/4)
+	return int(nf2) * 2
+}
+
 func newCtx(img image.Image, totalFrames, fps int, w, h int) *ctx {
-	img = imaging.Fit(img, w, h, imaging.Linear)
+	img = imaging.Fit(img, rotatedSize(w), rotatedSize(h), imaging.Linear)
+	img = imaging.PasteCenter(image.NewRGBA(image.Rect(0, 0, w, h)), img)
+
 	return &ctx{
 		g:           &gif.GIF{LoopCount: -1},
 		img:         img,
@@ -63,12 +71,6 @@ func newCtx(img image.Image, totalFrames, fps int, w, h int) *ctx {
 		w:           w,
 		h:           h,
 	}
-}
-
-func maxRotatedSize(n int) int {
-	nf := float64(n) / 2
-	nf2 := nf / math.Cos(math.Pi/4)
-	return int(nf2) * 2
 }
 
 var addr = flag.String("addr", "", "[host]:port to listen on, if set overrides all other behavior. Other flag values will be used as defaults for calls")
