@@ -61,7 +61,7 @@ func rotatedSize(n int) int {
 }
 
 func newCtx(img image.Image, totalFrames, fps int, w, h int, counterclockwise bool) *ctx {
-	img = imaging.Fit(img, rotatedSize(w), rotatedSize(h), imaging.Linear)
+	img = imaging.Fit(img, w, h, imaging.Linear)
 	img = imaging.PasteCenter(image.NewRGBA(image.Rect(0, 0, w, h)), img)
 
 	return &ctx{
