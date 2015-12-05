@@ -60,9 +60,27 @@ func rotatedSize(n int) int {
 	return int(nf2) * 2
 }
 
-func newCtx(img image.Image, totalFrames, fps int, w, h int, counterclockwise bool) *ctx {
-	img = imaging.Fit(img, w, h, imaging.Linear)
-	img = imaging.PasteCenter(image.NewRGBA(image.Rect(0, 0, w, h)), img)
+func scaleTo(inw, inh, outw, outh int) (int, int) {
+	finw, finh := float64(inw), float64(inh)
+	foutw, fouth := float64(outw), float64(outh)
+	if inw > inh {
+		fract := foutw / finw
+		return outw, int(fract * finh)
+	} else {
+		fract := fouth / finh
+		return int(fract * finw), outh
+	}
+}
+
+func newCtx(img image.Image, totalFrames, fps int, w, h int, counterclockwise, shrink bool) *ctx {
+	oldw, oldh := img.Bounds().Dx(), img.Bounds().Dy()
+	neww, newh := scaleTo(oldw, oldh, w, h)
+	if shrink {
+		img = imaging.Resize(img, rotatedSize(neww), rotatedSize(newh), imaging.Linear)
+		img = imaging.PasteCenter(image.NewRGBA(image.Rect(0, 0, neww, newh)), img)
+	} else {
+		img = imaging.Resize(img, neww, newh, imaging.Linear)
+	}
 
 	return &ctx{
 		g:                &gif.GIF{LoopCount: -1},
@@ -81,6 +99,7 @@ var fps = flag.Int("fps", 20, "frames per second the gif should run at")
 var width = flag.Int("maxWidth", 128, "max width of the gif to output")
 var height = flag.Int("maxHeight", 128, "max height of the gif to output")
 var counterclockwise = flag.Bool("counterclockwise", false, "if set the image will be spin counterclockwise")
+var shrink = flag.Bool("shrink", false, "if set the image will be shrunken so corners won't be cut off during spinning")
 
 var doLog = true
 
@@ -97,7 +116,7 @@ func main() {
 		log.Fatal(http.ListenAndServe(*addr, nil))
 	}
 
-	if err := partyfy(os.Stdin, *totalFrames, *fps, *width, *height, *counterclockwise, os.Stdout); err != nil {
+	if err := partyfy(os.Stdin, *totalFrames, *fps, *width, *height, *counterclockwise, *shrink, os.Stdout); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -132,17 +151,18 @@ func partyHTTP(w http.ResponseWriter, r *http.Request) {
 		reqInt(r, "maxWidth", *width),
 		reqInt(r, "maxHeight", *height),
 		r.FormValue("counterclockwise") != "" || *counterclockwise,
+		r.FormValue("shrink") != "" || *shrink,
 		w,
 	)
 }
 
-func partyfy(r io.Reader, totalFrames, fps, width, height int, counterclockwise bool, w io.Writer) error {
+func partyfy(r io.Reader, totalFrames, fps, width, height int, counterclockwise, shrink bool, w io.Writer) error {
 	srcImg, _, err := image.Decode(r)
 	if err != nil {
 		return err
 	}
 
-	c := newCtx(srcImg, totalFrames, fps, width, height, counterclockwise)
+	c := newCtx(srcImg, totalFrames, fps, width, height, counterclockwise, shrink)
 	for {
 		if ok, err := c.nextFrame(); err != nil {
 			return err

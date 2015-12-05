@@ -33,6 +33,10 @@ var index = `<html>
 				Make the party go counterclockwise:</br>
 				<input type="checkbox" name="counterclockwise" />
 			</p>
+			<p>
+				Shrink the party a bit so as to not cut off the corners when spinning:</br>
+				<input type="checkbox" name="shrink" />
+			</p>
     		<input type="submit" value="PARTYPARTYPARTY" />
 			<br/>
 			<br/>
