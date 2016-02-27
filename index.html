@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PARTYPARTYPARTYPARTYPARTY</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+  <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .jumbotron {
+      background-color: #327EB2;
+      color: #fff;
+      text-align: center;
+    }
+
+    .container,
+    .jumbotron .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="jumbotron">
+    <div class="container">
+      <img src="http://i.imgur.com/EWZzW6E.gif" />
+      <img src="http://i.imgur.com/EWZzW6E.gif" />
+      <img src="http://i.imgur.com/EWZzW6E.gif" />
+    </div>
+  </div>
+  <div class="container">
+    <form action="/partyfy" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="file">Upload a file to paryify</label>
+        <input type="file" name="file" />
+      </div>
+
+      <div class="form-group">
+        <label for="totalFrames">
+          Total frames
+          <p class="help-block">The number of frames in the gif (aka one single spin)</p>
+        </label>
+        <input class="form-control" type="text" name="totalFrames" value="20" />
+      </div>
+
+      <div class="form-group">
+        <label for="fps">
+          FPS
+          <p class="help-block">Number of frames displayed every second. (Total frames) / FPS = gif duration</p>
+        </label>
+        <input class="form-control" type="text" name="fps" value="20" />
+      </div>
+
+      <div class="form-group">
+        <label for="maxWidth">
+          Max width
+        </label>
+        <input class="form-control" type="text" name="maxWidth" value="128" />
+      </div>
+      <div class="form-group">
+        <label for="maxWidth">
+          Max height
+        </label>
+        <input class="form-control" type="text" name="maxHeight" value="128" />
+      </div>
+      <div class="form-group">
+        <label for="counterclockwise">
+          <input type="checkbox" name="counterclockwise" />
+          Rotate image counterclockwise
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="shrink">
+          <input type="checkbox" name="shrink" value="" />
+          Shrink the party a bit so as to not cut off the corners when spinning
+        </label>
+      </div>
+      <button type="submit" class="btn btn-default">PARTYPARTYPARTY</button>
+    </form>
+  </div>
+</body>
+</html>
