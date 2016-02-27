@@ -18,7 +18,7 @@ import (
 
 	"github.com/disintegration/imaging"
 
-	"code.google.com/p/graphics-go/graphics"
+	"github.com/akenn/graphics-go/graphics"
 )
 
 func incColor(c color.RGBA) color.RGBA {
