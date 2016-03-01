@@ -1,5 +1,7 @@
 # party-aas
 
+The code for https://party.mediocregopher.com
+
 Takes and image and turns it into a party (gif)! By default reads a jpg or png
 from stdin and writes it to stdout. Can also be run as a web service by passing
 the `-addr` option.
@@ -33,4 +35,3 @@ $ cat fire.png | ./party-aas -counterclockwise=true > fire-party.gif
 ```
 $ ./party-aas -addr=localhost:8000
 ```
-
