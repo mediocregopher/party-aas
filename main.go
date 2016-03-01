@@ -1,5 +1,7 @@
 package main
 
+//go:generate varembed -in index.html -out index.go -pkg main -varname indexBytes
+
 import (
 	"flag"
 	"image"
@@ -109,7 +111,9 @@ func main() {
 	if *addr != "" {
 		doLog = false
 
-		http.HandleFunc("/", indexHTTP)
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write(indexBytes)
+		})
 		http.HandleFunc("/partyfy", partyHTTP)
 
 		log.Printf("listening on %s", *addr)

@@ -6,10 +6,14 @@ the `-addr` option.
 
 ![PARTY](/out.gif)
 
-# Install
+# Building
 
 ```
+$ cd party-aas
 $ go get
+$ go install github.com/mediocregopher/varembed
+$ go generate
+$ go build
 ```
 
 # Exampe Usages
@@ -21,12 +25,12 @@ Here are example usages of each:
 ## Command line tool
 
 ```
-$ cat fire.png | go run index.go main.go -counterclockwise=true > fire-party.gif
+$ cat fire.png | ./party-aas -counterclockwise=true > fire-party.gif
 ```
 
 ## Webserver
 
 ```
-$ go run index.go main.go -addr=localhost:8000
+$ ./party-aas -addr=localhost:8000
 ```
 
